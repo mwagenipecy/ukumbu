@@ -198,8 +198,8 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900">{{ $venue->user->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $venue->user->email }}</div>
+                                    <div class="text-sm text-gray-900">{{ $venue->user->name ?? 'No Owner' }}</div>
+                                    <div class="text-sm text-gray-500">{{ $venue->user->email ?? 'No Email' }}</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -332,6 +332,31 @@
                 </div>
 
                 <!-- Form -->
+                <!-- Validation Errors Summary -->
+                @if ($errors->any())
+                    <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">
+                                    Please fix the following errors:
+                                </h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <form wire:submit.prevent="save" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Left Column -->
@@ -349,16 +374,45 @@
                                 @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
 
+                            <!-- Price Range -->
+                            <div class="space-y-4">
+                                <label class="block text-sm font-medium text-gray-700">Price Range (TSh) *</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <input 
+                                            type="number" 
+                                            wire:model="price_min"
+                                            placeholder="Min price"
+                                            min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('price_min') border-red-500 @enderror"
+                                        >
+                                        @error('price_min') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    </div>
+                                    <div>
+                                        <input 
+                                            type="number" 
+                                            wire:model="price_max"
+                                            placeholder="Max price"
+                                            min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('price_max') border-red-500 @enderror"
+                                        >
+                                        @error('price_max') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price Type -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Base Price (TSh) *</label>
-                                <input 
-                                    type="number" 
-                                    wire:model="base_price"
-                                    placeholder="Enter base price"
-                                    min="0"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('base_price') border-red-500 @enderror"
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Price Type *</label>
+                                <select 
+                                    wire:model="price_type"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('price_type') border-red-500 @enderror"
                                 >
-                                @error('base_price') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                    <option value="per_event">Per Event</option>
+                                    <option value="per_hour">Per Hour</option>
+                                    <option value="per_day">Per Day</option>
+                                </select>
+                                @error('price_type') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
 
                             <div>
@@ -368,9 +422,11 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('category_id') border-red-500 @enderror"
                                 >
                                     <option value="">Select Category</option>
-                                    @foreach($categories as $category)
+                                    @forelse($categories as $category)
                                         <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
+                                    @empty
+                                        <option value="" disabled>No venue categories available</option>
+                                    @endforelse
                                 </select>
                                 @error('category_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
@@ -382,9 +438,11 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('user_id') border-red-500 @enderror"
                                 >
                                     <option value="">Select Owner</option>
-                                    @foreach($vendors as $vendor)
+                                    @forelse($vendors as $vendor)
                                         <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
-                                    @endforeach
+                                    @empty
+                                        <option value="" disabled>No vendors available</option>
+                                    @endforelse
                                 </select>
                                 @error('user_id') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                             </div>
@@ -440,6 +498,40 @@
                                     >
                                     @error('longitude') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                                 </div>
+                            </div>
+
+                            <!-- Get Current Location Button -->
+                            <div class="flex justify-start space-x-3">
+                                @if(!$locationCaptured)
+                                    <button type="button" 
+                                            wire:click="getCurrentLocation"
+                                            @disabled($gettingLocation)
+                                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                        @if($gettingLocation)
+                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Getting Location...
+                                        @else
+                                            <i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>
+                                            Use Current Location
+                                        @endif
+                                    </button>
+                                @else
+                                    <div class="flex items-center space-x-3">
+                                        <div class="inline-flex items-center px-4 py-2 border border-green-300 bg-green-50 rounded-lg text-sm text-green-700">
+                                            <i class="fas fa-check-circle mr-2 text-green-500"></i>
+                                            Location Captured Successfully
+                                        </div>
+                                        <button type="button" 
+                                                wire:click="resetLocationCapture"
+                                                class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                            <i class="fas fa-redo mr-2"></i>
+                                            Re-capture
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
 
                             @if(!empty($gallery))
@@ -683,6 +775,65 @@ function confirmDelete(venueId, venueName) {
         @this.call('deleteVenue', venueId);
     }
 }
+
+// Geolocation functionality for venue creation
+document.addEventListener('livewire:initialized', function() {
+    let isGettingLocation = false;
+
+    Livewire.on('getCurrentLocation', function() {
+        // Prevent multiple simultaneous location requests
+        if (isGettingLocation) {
+            return;
+        }
+
+        if (navigator.geolocation) {
+            isGettingLocation = true;
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Reverse geocoding to get location name (optional)
+                    fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const locationName = data.city || data.locality || data.countryName || 'Unknown Location';
+                            Livewire.dispatch('locationSelected', {
+                                latitude: lat,
+                                longitude: lng,
+                                locationName: locationName
+                            });
+                        })
+                        .catch(() => {
+                            Livewire.dispatch('locationSelected', {
+                                latitude: lat,
+                                longitude: lng,
+                                locationName: null
+                            });
+                        })
+                        .finally(() => {
+                            isGettingLocation = false;
+                        });
+                },
+                function(error) {
+                    isGettingLocation = false;
+                    // Reset the UI state on error
+                    Livewire.dispatch('locationError');
+                    alert('Error getting location: ' + error.message + '. Please enter coordinates manually or try again.');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by this browser. Please enter coordinates manually.');
+            Livewire.dispatch('locationError');
+        }
+    });
+});
 </script>
 
 

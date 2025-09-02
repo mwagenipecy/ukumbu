@@ -29,14 +29,33 @@ class WebController extends Controller
 
 
     public function venueManagement(){
+        $user = auth()->user();
+        
+        if($user === null){
+            return view('pages.client.venue-management'); // Client venue browsing
+        }
 
-        return view('pages.client.venue-management');
+        if ($user && $user->role === 'admin') {
+            return view('pages.admin.venue-management'); // Admin venue management
+        } else {
+            return view('pages.client.venue-management'); // Client venue browsing
+        }
     }
     
 
     public function servicesManagement(){
-
-        return view('pages.client.services-management');
+        $user = auth()->user();
+        
+        if($user === null){
+            return view('pages.client.services-management'); // Client services browsing
+        }
+        if ($user->role === 'admin') {
+            return view('pages.admin.services-management'); // Admin services management
+        } elseif ($user->role === 'vendor') {
+            return view('pages.vendor.services-management'); // Vendor services management
+        } else {
+            return view('pages.client.services-management'); // Client services management
+        }
     }
 
 

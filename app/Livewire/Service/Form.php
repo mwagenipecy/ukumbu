@@ -14,6 +14,12 @@ class Form extends Component
 {
     use WithFileUploads;
 
+    protected $listeners = [
+        'setLocation' => 'setLocation',
+        'getCurrentLocation' => 'getCurrentLocation', 
+        'locationError' => 'handleLocationError'
+    ];
+
     public ?Service $service = null;
     public bool $isEdit = false;
 
@@ -24,6 +30,8 @@ class Form extends Component
     public $description;
     public $pricing_model = 'flat';
     public $price;
+    public $price_min;
+    public $price_max;
     public $location_name;
     public $latitude;
     public $longitude;
@@ -35,27 +43,14 @@ class Form extends Component
     public $newImages = [];
     public $imagesToDelete = [];
 
+    // Location capture state
+    public $locationCaptured = false;
+    public $gettingLocation = false;
+
     // Search functionality
     public $searchProvider = '';
     public $showProviderDropdown = false;
     public $providers = [];
-
-    protected function rules()
-    {
-        return [
-            'user_id' => ['required', 'exists:users,id'],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:1000'],
-            'pricing_model' => ['required', 'in:flat,hourly,per_guest'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'location_name' => ['required', 'string', 'max:255'],
-            'latitude' => ['required', 'numeric', 'between:-90,90'],
-            'longitude' => ['required', 'numeric', 'between:-180,180'],
-            'status' => ['required', 'in:pending,active,suspended,rejected'],
-            'newImages.*' => ['nullable', 'image', 'max:2048'],
-        ];
-    }
 
     protected $validationAttributes = [
         'user_id' => 'service provider',
@@ -65,19 +60,58 @@ class Form extends Component
         'newImages.*' => 'image',
     ];
 
+    
+
     public function mount(?Service $service = null)
     {
-        if ($service->exists) {
+        if ($service && $service->exists) {
             $this->service = $service;
             $this->isEdit = true;
-            $this->fill($service->toArray());
+            $this->user_id = $service->user_id;
+            $this->category_id = $service->category_id;
+            $this->name = $service->name;
+            $this->description = $service->description;
+            $this->pricing_model = $service->pricing_model;
+            $this->price = $service->price;
+            $this->price_min = $service->price_min ?? $service->price;
+            $this->price_max = $service->price_max ?? $service->price;
+            $this->location_name = $service->location_name;
+            $this->latitude = $service->latitude;
+            $this->longitude = $service->longitude;
+            $this->status = $service->status;
             $this->existingImages = $service->gallery ?? [];
+            
+            // Set location as captured if coordinates exist
+            $this->locationCaptured = !empty($service->latitude) && !empty($service->longitude);
+            $this->gettingLocation = false;
+        } else {
+            $this->user_id = auth()->id(); // Set current user as vendor by default
         }
-
+        
+        // Load initial provider list
         $this->providers = User::where('role', 'vendor')
             ->orderBy('name')
             ->limit(10)
             ->get();
+    }
+
+    protected function rules()
+    {
+        return [
+            'user_id' => ['required', 'exists:users,id'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'pricing_model' => ['required', 'in:flat,hourly,per_guest'],
+            'price' => ['nullable', 'numeric', 'min:0'],
+            'price_min' => ['required', 'numeric', 'min:0'],
+            'price_max' => ['required', 'numeric', 'min:0', 'gte:price_min'],
+            'location_name' => ['required', 'string', 'max:255'],
+            'latitude' => ['required', 'numeric', 'between:-90,90'],
+            'longitude' => ['required', 'numeric', 'between:-180,180'],
+            'status' => ['required', 'in:pending,active,suspended,rejected'],
+            'newImages.*' => ['nullable', 'image', 'max:2048'],
+        ];
     }
 
     public function updatedSearchProvider()
@@ -130,22 +164,59 @@ class Form extends Component
 
     public function getCurrentLocation()
     {
-        $this->dispatch('getCurrentLocation');
+        if (!$this->gettingLocation && !$this->locationCaptured) {
+            $this->gettingLocation = true;
+            $this->dispatch('getCurrentLocation');
+        }
     }
 
-    public function setLocation($latitude, $longitude, $locationName = null)
+    public function setLocation($data)
     {
-        $this->latitude = $latitude;
-        $this->longitude = $longitude;
+        $this->latitude = $data['latitude'] ?? null;
+        $this->longitude = $data['longitude'] ?? null;
         
-        if ($locationName) {
-            $this->location_name = $locationName;
+        if (!empty($data['locationName'])) {
+            $this->location_name = $data['locationName'];
         }
+        
+        $this->locationCaptured = true;
+        $this->gettingLocation = false;
+    }
+
+    public function resetLocationCapture()
+    {
+        $this->locationCaptured = false;
+        $this->gettingLocation = false;
+        $this->latitude = '';
+        $this->longitude = '';
+        $this->location_name = '';
+    }
+
+    public function handleLocationError()
+    {
+        $this->gettingLocation = false;
+        $this->locationCaptured = false;
     }
 
     public function save()
     {
-        $this->validate();
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Log validation errors for debugging
+            \Log::error('Service validation failed', [
+                'errors' => $e->errors(),
+                'data' => $this->only([
+                    'user_id', 'category_id', 'name', 'description', 'pricing_model',
+                    'price', 'price_min', 'price_max', 'location_name', 'latitude', 
+                    'longitude', 'status'
+                ])
+            ]);
+            
+            // Set session flash with validation errors for user feedback
+            session()->flash('error', 'Please fix the validation errors below.');
+            throw $e;
+        }
 
         try {
             // Handle image uploads
@@ -153,7 +224,7 @@ class Form extends Component
 
             foreach ($this->newImages as $image) {
                 $path = $image->store('services', 'public');
-                $galleryImages[] = Storage::url($path);
+                $galleryImages[] = $path;
             }
 
             // Delete removed images from storage
@@ -168,7 +239,9 @@ class Form extends Component
                 'name' => $this->name,
                 'description' => $this->description,
                 'pricing_model' => $this->pricing_model,
-                'price' => $this->price,
+                'price' => $this->price ?: null, // Convert empty string to null
+                'price_min' => $this->price_min,
+                'price_max' => $this->price_max,
                 'location_name' => $this->location_name,
                 'latitude' => $this->latitude,
                 'longitude' => $this->longitude,
@@ -184,16 +257,22 @@ class Form extends Component
                 session()->flash('success', 'Service created successfully.');
             }
 
-            return redirect()->route('admin.services.index');
+            return redirect()->route('services.management');
 
         } catch (\Exception $e) {
-            session()->flash('error', 'An error occurred while saving the service. Please try again.');
+            \Log::error('Error saving service', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'serviceData' => $serviceData ?? null
+            ]);
+            session()->flash('error', 'An error occurred while saving the service: ' . $e->getMessage());
         }
     }
 
     public function cancel()
     {
-        return redirect()->route('admin.services.index');
+        return redirect()->route('services.management');
     }
 
     public function render()
@@ -210,4 +289,7 @@ class Form extends Component
             'selectedProvider' => $selectedProvider,
         ]);
     }
+
+
+
 }

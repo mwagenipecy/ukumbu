@@ -16,6 +16,8 @@ class Service extends Model
         'description',
         'pricing_model',
         'price',
+        'price_min',
+        'price_max',
         'location_name',
         'latitude',
         'longitude',
@@ -25,6 +27,8 @@ class Service extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'price_min' => 'decimal:2',
+        'price_max' => 'decimal:2',
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
         'gallery' => 'array',
@@ -92,7 +96,15 @@ class Service extends Model
 
     public function getFormattedPriceAttribute()
     {
-        $price = 'TSh ' . number_format($this->price, 0);
+        if ($this->price_min && $this->price_max) {
+            if ($this->price_min == $this->price_max) {
+                $price = 'TSh ' . number_format($this->price_min, 0);
+            } else {
+                $price = 'TSh ' . number_format($this->price_min, 0) . ' - ' . number_format($this->price_max, 0);
+            }
+        } else {
+            $price = 'TSh ' . number_format($this->price ?? 0, 0);
+        }
         
         if ($this->pricing_model === 'hourly') {
             $price .= '/hr';

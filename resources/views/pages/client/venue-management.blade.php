@@ -1,9 +1,5 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
 @section('content')
-
-
-
-  <livewire:admin.venues />
-
+  <livewire:client.venue-list />
 @endsection

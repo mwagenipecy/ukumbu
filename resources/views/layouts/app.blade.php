@@ -57,25 +57,25 @@
                             Home
                         </a>
                         
-                        <a href="" class="text-gray-700 hover:text-blue-900 font-medium transition-colors duration-200 {{ request()->routeIs('venues.*') ? 'text-blue-900 border-b-2 border-blue-900 pb-1' : '' }}">
+                        <a href="{{ route('venue.management') }}" class="text-gray-700 hover:text-blue-900 font-medium transition-colors duration-200 {{ request()->routeIs('venue.*') ? 'text-blue-900 border-b-2 border-blue-900 pb-1' : '' }}">
                             <i class="fas fa-building mr-1"></i>
                             Venues
                         </a>
                         
-                        <a href="" class="text-gray-700 hover:text-blue-900 font-medium transition-colors duration-200 {{ request()->routeIs('services.*') ? 'text-blue-900 border-b-2 border-blue-900 pb-1' : '' }}">
+                        <a href="{{ route('services.management') }}" class="text-gray-700 hover:text-blue-900 font-medium transition-colors duration-200 {{ request()->routeIs('services.*') ? 'text-blue-900 border-b-2 border-blue-900 pb-1' : '' }}">
                             <i class="fas fa-concierge-bell mr-1"></i>
                             Services
                         </a>
 
                         @auth
-                            <a href="" class="text-gray-700 hover:text-blue-900 font-medium transition-colors duration-200 {{ request()->routeIs('bookings.*') ? 'text-blue-900 border-b-2 border-blue-900 pb-1' : '' }}">
+                            <a href="{{ route('booking.management') }}" class="text-gray-700 hover:text-blue-900 font-medium transition-colors duration-200 {{ request()->routeIs('booking.*') ? 'text-blue-900 border-b-2 border-blue-900 pb-1' : '' }}">
                                 <i class="fas fa-calendar-check mr-1"></i>
                                 My Bookings
                             </a>
 
-                            <a href="" class="text-gray-700 hover:text-blue-900 font-medium transition-colors duration-200 {{ request()->routeIs('favorites.*') ? 'text-blue-900 border-b-2 border-blue-900 pb-1' : '' }}">
+                            <a href="{{ route('user.dashboard') }}" class="text-gray-700 hover:text-blue-900 font-medium transition-colors duration-200 {{ request()->routeIs('user.dashboard') ? 'text-blue-900 border-b-2 border-blue-900 pb-1' : '' }}">
                                 <i class="fas fa-heart mr-1"></i>
-                                Favorites
+                                Dashboard
                             </a>
                         @endauth
                     </div>
@@ -131,29 +131,37 @@
                                         Profile Settings
                                     </a>
 
-                                    <a href="" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <a href="{{ route('booking.management') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         <i class="fas fa-calendar-check mr-3 text-gray-400"></i>
                                         My Bookings
                                     </a>
 
-                                    <a href="" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                    <a href="{{ route('user.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                                         <i class="fas fa-heart mr-3 text-gray-400"></i>
-                                        Favorites
+                                        My Dashboard
                                     </a>
 
                                     @if(Auth::user()->role === 'vendor')
                                         <div class="border-t border-gray-100 my-1"></div>
-                                        <a href="{{ route('vendor.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                            <i class="fas fa-store mr-3 text-gray-400"></i>
-                                            Vendor Dashboard
+                                        <a href="{{ route('venue.management') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <i class="fas fa-building mr-3 text-gray-400"></i>
+                                            My Venues
+                                        </a>
+                                        <a href="{{ route('services.management') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <i class="fas fa-concierge-bell mr-3 text-gray-400"></i>
+                                            My Services
                                         </a>
                                     @endif
-
+                                    
                                     @if(Auth::user()->role === 'admin')
                                         <div class="border-t border-gray-100 my-1"></div>
-                                        <a href="{{ route('admin.dashboard') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                                            <i class="fas fa-cog mr-3 text-gray-400"></i>
-                                            Admin Panel
+                                        <a href="{{ route('admin.calendar') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <i class="fas fa-calendar mr-3 text-gray-400"></i>
+                                            Admin Calendar
+                                        </a>
+                                        <a href="{{ route('user.management') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                            <i class="fas fa-users mr-3 text-gray-400"></i>
+                                            User Management
                                         </a>
                                     @endif
 
@@ -388,8 +396,7 @@
         @stack('modals')
 
         @livewireScripts
-
-        <!-- Alpine.js for interactive components -->
-        <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        
+        {{-- Alpine.js is included with Livewire --}}
     </body>
 </html>

@@ -36,6 +36,31 @@
             </div>
         </div>
 
+        <!-- Validation Errors Summary -->
+        @if ($errors->any())
+            <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">
+                            Please fix the following errors:
+                        </h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <ul class="list-disc pl-5 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Form -->
         <form wire:submit.prevent="save" class="space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -119,30 +144,50 @@
                                 @enderror
                             </div>
 
-                            <!-- Price -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">
-                                    Price (TSh) *
+                            <!-- Price Range -->
+                            <div class="space-y-4">
+                                <label class="block text-sm font-medium text-gray-700">
+                                    Price Range (TSh) *
                                     @if($pricing_model === 'hourly')
                                         <span class="text-gray-500">per hour</span>
                                     @elseif($pricing_model === 'per_guest')
                                         <span class="text-gray-500">per guest</span>
                                     @endif
                                 </label>
-                                <div class="relative">
-                                    <input type="number" 
-                                           wire:model="price" 
-                                           step="0.01"
-                                           min="0"
-                                           class="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('price') border-red-300 @enderror"
-                                           placeholder="0.00">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
-                                        <span class="text-gray-500">TSh</span>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <div class="relative">
+                                            <input type="number" 
+                                                   wire:model="price_min" 
+                                                   step="0.01"
+                                                   min="0"
+                                                   class="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('price_min') border-red-300 @enderror"
+                                                   placeholder="Min price">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                                <span class="text-gray-500 text-sm">TSh</span>
+                                            </div>
+                                        </div>
+                                        @error('price_min')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <div class="relative">
+                                            <input type="number" 
+                                                   wire:model="price_max" 
+                                                   step="0.01"
+                                                   min="0"
+                                                   class="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('price_max') border-red-300 @enderror"
+                                                   placeholder="Max price">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+                                                <span class="text-gray-500 text-sm">TSh</span>
+                                            </div>
+                                        </div>
+                                        @error('price_max')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
-                                @error('price')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
                             </div>
                         </div>
                     </div>
@@ -191,13 +236,37 @@
                             </div>
 
                             <!-- Get Current Location Button -->
-                            <div class="flex justify-start">
-                                <button type="button" 
-                                        wire:click="getCurrentLocation"
-                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>
-                                    Use Current Location
-                                </button>
+                            <div class="flex justify-start space-x-3">
+                                @if(!$locationCaptured)
+                                    <button type="button" 
+                                            wire:click="getCurrentLocation"
+                                            @disabled($gettingLocation)
+                                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                        @if($gettingLocation)
+                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Getting Location...
+                                        @else
+                                            <i class="fas fa-map-marker-alt mr-2 text-blue-500"></i>
+                                            Use Current Location
+                                        @endif
+                                    </button>
+                                @else
+                                    <div class="flex items-center space-x-3">
+                                        <div class="inline-flex items-center px-4 py-2 border border-green-300 bg-green-50 rounded-lg text-sm text-green-700">
+                                            <i class="fas fa-check-circle mr-2 text-green-500"></i>
+                                            Location Captured Successfully
+                                        </div>
+                                        <button type="button" 
+                                                wire:click="resetLocationCapture"
+                                                class="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                                            <i class="fas fa-redo mr-2"></i>
+                                            Re-capture
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -347,47 +416,83 @@
         </form>
     </div>
 
-    @push('scripts')
+       @push('scripts')
     <script>
-        // Geolocation functionality
+        // Geolocation functionality for service creation
         document.addEventListener('livewire:initialized', function() {
+            console.log('Services form: Livewire initialized');
+            let isGettingLocation = false;
+
             Livewire.on('getCurrentLocation', function() {
+                console.log('Services form: getCurrentLocation event received');
+                
+                // Prevent multiple simultaneous location requests
+                if (isGettingLocation) {
+                    console.log('Services form: Already getting location, returning');
+                    return;
+                }
+
                 if (navigator.geolocation) {
+                    console.log('Services form: Geolocation available, requesting position');
+                    isGettingLocation = true;
+                    
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
+                            console.log('Services form: Position received:', position.coords);
                             const lat = position.coords.latitude;
                             const lng = position.coords.longitude;
                             
                             // Reverse geocoding to get location name (optional)
+                            console.log('Services form: Starting reverse geocoding');
                             fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
                                 .then(response => response.json())
                                 .then(data => {
+                                    console.log('Services form: Reverse geocoding successful:', data);
                                     const locationName = data.city || data.locality || data.countryName || 'Unknown Location';
-                                    Livewire.dispatch('setLocation', {
+                                    const locationData = {
                                         latitude: lat,
                                         longitude: lng,
                                         locationName: locationName
-                                    });
+                                    };
+                                    console.log('Services form: Dispatching setLocation with:', locationData);
+                                    Livewire.dispatch('setLocation', locationData);
                                 })
-                                .catch(() => {
-                                    Livewire.dispatch('setLocation', {
+                                .catch((error) => {
+                                    console.log('Services form: Reverse geocoding failed, using coordinates only:', error);
+                                    const locationData = {
                                         latitude: lat,
                                         longitude: lng
-                                    });
+                                    };
+                                    console.log('Services form: Dispatching setLocation with:', locationData);
+                                    Livewire.dispatch('setLocation', locationData);
+                                })
+                                .finally(() => {
+                                    console.log('Services form: Setting isGettingLocation to false');
+                                    isGettingLocation = false;
                                 });
                         },
                         function(error) {
-                            alert('Error getting location: ' + error.message);
+                            console.error('Services form: Geolocation error:', error);
+                            isGettingLocation = false;
+                            // Reset the UI state on error
+                            Livewire.dispatch('locationError');
+                            alert('Error getting location: ' + error.message + '. Please enter coordinates manually or try again.');
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 60000
                         }
                     );
                 } else {
-                    alert('Geolocation is not supported by this browser.');
+                    console.error('Services form: Geolocation not supported');
+                    alert('Geolocation is not supported by this browser. Please enter coordinates manually.');
+                    Livewire.dispatch('locationError');
                 }
             });
+            
+            console.log('Services form: Event listeners registered');
         });
     </script>
-    @endpush
-    @endsection
-</div>
-
+    @endpush   
 </div>

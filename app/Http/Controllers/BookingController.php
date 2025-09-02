@@ -7,8 +7,16 @@ use Illuminate\Http\Request;
 class BookingController extends Controller
 {
     public function bookingManagement(){
-
-        return view('pages.client.booking-management');
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            return view('pages.client.booking-management'); // Admin booking management
+        } elseif ($user->role === 'vendor') {
+            return view('pages.vendor.booking-management'); // Vendor booking management
+        } else {
+            // Client booking management (via user dashboard)
+            return redirect()->route('user.dashboard');
+        }
     }
 
     public function pendingBooking(){

@@ -14,28 +14,32 @@ class UsersSeeder extends Seeder
             'name' => 'Admin User',
             'email' => 'admin@example.com',
             'password' => Hash::make('password'),
-            'role' => 'admin'
+            'role' => 'admin',
+            'status' => 'approved'
         ]);
 
         User::create([
             'name' => 'Venue Owner',
             'email' => 'venue@example.com',
             'password' => Hash::make('password'),
-            'role' => 'vendor'
+            'role' => 'vendor',
+            'status' => 'approved'
         ]);
 
         User::create([
             'name' => 'Service Provider',
             'email' => 'service@example.com',
             'password' => Hash::make('password'),
-            'role' => 'vendor'
+            'role' => 'vendor',
+            'status' => 'pending'
         ]);
 
         User::create([
             'name' => 'Regular Client',
             'email' => 'client@example.com',
             'password' => Hash::make('password'),
-            'role' => 'client'
+            'role' => 'client',
+            'status' => 'approved'
         ]);
     }
 }

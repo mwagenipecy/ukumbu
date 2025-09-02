@@ -164,20 +164,32 @@
                 <!-- Location Map -->
                 <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
                     <h2 class="text-xl font-semibold text-gray-900 mb-4">Location</h2>
-                    <div class="bg-gray-100 rounded-lg h-64 flex items-center justify-center mb-4">
-                        <div id="venue-map" class="w-full h-full rounded-lg">
-                            <div class="flex items-center justify-center h-full text-gray-500">
-                                <div class="text-center">
-                                    <i class="fas fa-map-marker-alt text-3xl mb-2"></i>
-                                    <p>Interactive map will load here</p>
-                                    <p class="text-sm">{{ $venue->location_name }}</p>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="bg-gray-100 rounded-lg h-64 mb-4 overflow-hidden">
+                        <iframe 
+                            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q={{ $venue->latitude }},{{ $venue->longitude }}&zoom=15&maptype=roadmap"
+                            width="100%" 
+                            height="100%" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Location of {{ $venue->name }}"
+                        ></iframe>
                     </div>
                     <div class="text-sm text-gray-600">
                         <p><strong>Address:</strong> {{ $venue->location_name }}</p>
                         <p><strong>Coordinates:</strong> {{ $venue->latitude }}, {{ $venue->longitude }}</p>
+                        <div class="mt-3">
+                            <a 
+                                href="https://www.google.com/maps?q={{ $venue->latitude }},{{ $venue->longitude }}" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                            >
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                Open in Google Maps
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -462,20 +474,20 @@
                             <h3 class="font-medium text-gray-900 mb-3">Booking Summary</h3>
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between">
-                                    <span>Venue rental</span>
-                                    <span>{{ $venue->formatted_price }}</span>
+                                    <span>Venue rental (max price)</span>
+                                    <span>TSh {{ number_format($venue->price_max ?? $venue->base_price ?? 0) }}</span>
                                 </div>
                                 @if(!empty($selectedServices))
                                     @foreach($venue->services->whereIn('id', $selectedServices) as $service)
                                         <div class="flex justify-between">
                                             <span>{{ $service->name }}</span>
-                                            <span>{{ $service->formatted_price }}</span>
+                                            <span>TSh {{ number_format($service->price ?? $service->price_max ?? 0) }}</span>
                                         </div>
                                     @endforeach
                                 @endif
                                 <div class="border-t border-gray-200 pt-2 flex justify-between font-semibold">
                                     <span>Total</span>
-                                    <span>TSh {{ number_format($venue->base_price + $venue->services->whereIn('id', $selectedServices)->sum('price')) }}</span>
+                                    <span>TSh {{ number_format(($venue->price_max ?? $venue->base_price ?? 0) + $venue->services->whereIn('id', $selectedServices)->sum(function($service) { return $service->price ?? $service->price_max ?? 0; })) }}</span>
                                 </div>
                             </div>
                         </div>

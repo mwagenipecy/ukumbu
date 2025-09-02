@@ -403,7 +403,7 @@
     @endif
 
     @push('scripts')
-    <script src="//unpkg.com/alpinejs" defer></script>
+    {{-- Alpine.js is already loaded in the main layout --}}
     @endpush
     @endsection
 </div>

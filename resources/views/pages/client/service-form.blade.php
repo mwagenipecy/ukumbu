@@ -1,10 +1,4 @@
-@extends('layouts.admin')
-
-@section('content')
-
-
-
-<livewire:service.form />
-
-@endsection
+<x-app-layout>
+    <livewire:service.form />
+</x-app-layout>
 

@@ -108,16 +108,24 @@ class VenueDetail extends Component
             'selectedDate' => 'required|date|after:today',
         ]);
 
-        // Calculate total amount
-        $totalAmount = $this->venue->base_price;
+        // Calculate total amount using price_max (max amount) as base
+        $totalAmount = $this->venue->price_max ?? $this->venue->base_price ?? 0;
+        
+        // Add selected services prices
         foreach ($this->selectedServices as $serviceId) {
             $service = $this->venue->services->find($serviceId);
             if ($service) {
-                $totalAmount += $service->price;
+                $servicePrice = $service->price ?? $service->price_max ?? 0;
+                $totalAmount += $servicePrice;
             }
         }
 
-        // Create booking (simplified - in real app, you'd handle this differently)
+        // Ensure total amount is not null or zero
+        if ($totalAmount <= 0) {
+            $totalAmount = $this->venue->price_max ?? $this->venue->base_price ?? 10000; // Default fallback
+        }
+
+        // Create booking
         $booking = $this->venue->bookings()->create([
             'user_id' => Auth::id(),
             'event_date' => $this->selectedDate,
@@ -130,17 +138,19 @@ class VenueDetail extends Component
         foreach ($this->selectedServices as $serviceId) {
             $service = $this->venue->services->find($serviceId);
             if ($service) {
+                $servicePrice = $service->price ?? $service->price_max ?? 0;
                 $booking->bookingItems()->create([
                     'service_id' => $serviceId,
                     'quantity' => 1,
-                    'price' => $service->price,
+                    'price' => $servicePrice,
                 ]);
             }
         }
 
-        // Redirect to booking confirmation or payment
+        // Redirect to booking management page
         session()->flash('booking_success', 'Booking request submitted successfully!');
-        return redirect()->route('bookings.show', $booking->id);
+        $this->closeBookingModal();
+        return redirect()->route('booking.management');
     }
 
     public function submitReview()

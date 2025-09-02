@@ -1,10 +1,3 @@
-@extends('layouts.admin')
-
-@section('content')
-
-
-
- <livewire:admin.service.index />
-
- 
-@endsection
+<x-app-layout>
+    <livewire:client.service-list />
+</x-app-layout>

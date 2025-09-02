@@ -17,6 +17,9 @@ class Venue extends Model
         'name',
         'description',
         'base_price',
+        'price_min',
+        'price_max',
+        'price_type',
         'location_name',
         'latitude',
         'longitude',
@@ -26,6 +29,8 @@ class Venue extends Model
 
     protected $casts = [
         'base_price' => 'decimal:2',
+        'price_min' => 'decimal:2',
+        'price_max' => 'decimal:2',
         'latitude' => 'decimal:7',
         'longitude' => 'decimal:7',
         'gallery' => 'array',
@@ -78,7 +83,27 @@ class Venue extends Model
 
     public function getFormattedPriceAttribute()
     {
-        return 'TSh ' . number_format($this->base_price, 0);
+        if ($this->price_min && $this->price_max) {
+            if ($this->price_min == $this->price_max) {
+                $price = 'TSh ' . number_format($this->price_min, 0);
+            } else {
+                $price = 'TSh ' . number_format($this->price_min, 0) . ' - ' . number_format($this->price_max, 0);
+            }
+            
+            if ($this->price_type) {
+                $price .= match($this->price_type) {
+                    'per_hour' => '/hour',
+                    'per_day' => '/day',
+                    'per_event' => '/event',
+                    default => ''
+                };
+            }
+            
+            return $price;
+        }
+        
+        // Fallback to base_price if ranges not set
+        return 'TSh ' . number_format($this->base_price ?? 0, 0);
     }
 
     public function getAverageRatingAttribute()

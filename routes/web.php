@@ -42,8 +42,10 @@ Route::get('venue-management',[WebController::class,'venueManagement'])->name('v
 //// services managements 
 Route::get('services-management',[WebController::class,'servicesManagement'])->name('services.management');
 Route::get('view-service-details/{id}',[WebController::class,'viewServiceDetails'])->name('view.service.details');
-Route::get('service-form',[WebController::class,'serviceForm'])->name('admin.services.create');
-Route::get('service-form/{id}',[WebController::class,'serviceEditForm'])->name('service.form.edit');
+Route::middleware(['auth'])->group(function () {
+    Route::get('service-form',[WebController::class,'serviceForm'])->name('admin.services.create');
+    Route::get('service-form/{id}',[WebController::class,'serviceEditForm'])->name('service.form.edit');
+});
 
 
 
@@ -66,3 +68,52 @@ Route::get('pending-booking',[BookingController::class,'pendingBooking'])->name(
 Route::get('show-booking/{id}',[BookingController::class,'pendingBooking'])->name('admin.bookings.show');
 Route::get('booking-invoice/{booking}',[BookingController::class,'pendingBooking'])->name('admin.bookings.invoice');
 Route::get('payment-issues', [BookingController::class, 'paymentIssues'])->name('payment.issues');
+
+// Admin Calendar Route
+Route::get('admin/calendar', function () {
+    return view('livewire.admin.calendar');
+})->name('admin.calendar');
+
+// User Dashboard Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('user/dashboard', function () {
+        return view('pages.user-dashboard');
+    })->name('user.dashboard');
+    
+    Route::get('user/booking/{id}', function ($id) {
+        return view('pages.client.booking-details', ['id' => $id]);
+    })->name('user.booking.details');
+});
+
+// Vendor Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('vendor/dashboard', function () {
+        return view('pages.vendor-dashboard');
+    })->name('vendor.dashboard');
+
+    Route::get('vendor/pending', function () {
+        return view('pages.vendor.pending');
+    })->name('vendor.pending');
+});
+
+// Admin Routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('admin/dashboard', function () {
+        return view('pages.admin.dashboard');
+    })->name('admin.dashboard');
+    
+    // Admin Venue Management Routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('venues', function () {
+            return view('pages.admin.venue-management');
+        })->name('venues.index');
+        
+        Route::get('services', function () {
+            return view('pages.admin.services-management');
+        })->name('services.index');
+        
+        Route::get('services/create', function () {
+            return view('pages.client.service-form');
+        })->name('admin.services.create.form');
+    });
+});

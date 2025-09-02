@@ -1,10 +1,4 @@
-@extends('layouts.admin')
-
-@section('content')
-
-
-<livewire:service.show  :service="$service"/>
-
-
-@endsection
+<x-app-layout>
+    <livewire:client.service-detail :service="$service" />
+</x-app-layout>
 

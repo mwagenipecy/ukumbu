@@ -83,7 +83,7 @@
                             <i class="fas fa-chevron-down transform transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
                         </button>
                         <div x-show="open" x-transition class="ml-6 mt-2 space-y-1">
-                            <a href="{{ route('venue.management') }}" 
+                            <a href="{{ route('admin.venues.index') }}" 
                                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('admin.venues.index') ? 'bg-blue-50 text-blue-700' : '' }}">
                                 All Venues
                             </a>
@@ -110,7 +110,7 @@
                             <i class="fas fa-chevron-down transform transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
                         </button>
                         <div x-show="open" x-transition class="ml-6 mt-2 space-y-1">
-                            <a href="{{ route('services.management') }}" 
+                            <a href="{{ route('admin.services.index') }}" 
                                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('admin.services.index') ? 'bg-blue-50 text-blue-700' : '' }}">
                                 All Services
                             </a>
@@ -464,7 +464,7 @@
         @stack('modals')
         @livewireScripts
 
-        <!-- Alpine.js for interactive components -->
+        {{-- Alpine.js is included with Livewire --}}
         
         @stack('scripts')
     </body>

@@ -28,6 +28,9 @@ class Venues extends Component
     public $name = '';
     public $description = '';
     public $base_price = '';
+    public $price_min = '';
+    public $price_max = '';
+    public $price_type = 'per_event';
     public $location_name = '';
     public $latitude = '';
     public $longitude = '';
@@ -36,17 +39,24 @@ class Venues extends Component
     public $status = 'active';
     public $gallery = [];
     public $newImages = [];
+    public $locationCaptured = false;
+    public $gettingLocation = false;
 
     protected $listeners = [
         'venueDeleted' => '$refresh',
         'closeModal' => 'resetModal',
-        'locationSelected' => 'updateLocation'
+        'locationSelected' => 'updateLocation',
+        'getCurrentLocation' => 'getCurrentLocation',
+        'locationError' => 'handleLocationError'
     ];
 
     protected $rules = [
         'name' => 'required|string|max:255',
         'description' => 'nullable|string',
-        'base_price' => 'required|numeric|min:0',
+        'base_price' => 'nullable|numeric|min:0',
+        'price_min' => 'required|numeric|min:0',
+        'price_max' => 'required|numeric|min:0|gte:price_min',
+        'price_type' => 'required|in:per_event,per_hour,per_day',
         'location_name' => 'required|string|max:255',
         'latitude' => 'required|numeric|between:-90,90',
         'longitude' => 'required|numeric|between:-180,180',
@@ -58,8 +68,14 @@ class Venues extends Component
 
     protected $messages = [
         'name.required' => 'Venue name is required.',
-        'base_price.required' => 'Base price is required.',
-        'base_price.numeric' => 'Base price must be a valid number.',
+        'price_min.required' => 'Minimum price is required.',
+        'price_min.numeric' => 'Minimum price must be a valid number.',
+        'price_min.min' => 'Minimum price must be at least 0.',
+        'price_max.required' => 'Maximum price is required.',
+        'price_max.numeric' => 'Maximum price must be a valid number.',
+        'price_max.min' => 'Maximum price must be at least 0.',
+        'price_max.gte' => 'Maximum price must be greater than or equal to minimum price.',
+        'price_type.required' => 'Price type is required.',
         'latitude.required' => 'Latitude is required.',
         'latitude.between' => 'Latitude must be between -90 and 90.',
         'longitude.required' => 'Longitude is required.',
@@ -99,6 +115,10 @@ class Venues extends Component
 
     public function openCreateModal()
     {
+        if (!$this->checkDataAvailability()) {
+            return;
+        }
+        
         $this->resetModal();
         $this->showModal = true;
     }
@@ -111,6 +131,9 @@ class Venues extends Component
         $this->name = $venue->name;
         $this->description = $venue->description;
         $this->base_price = $venue->base_price;
+        $this->price_min = $venue->price_min ?? $venue->base_price;
+        $this->price_max = $venue->price_max ?? $venue->base_price;
+        $this->price_type = $venue->price_type ?? 'per_event';
         $this->location_name = $venue->location_name;
         $this->latitude = $venue->latitude;
         $this->longitude = $venue->longitude;
@@ -118,6 +141,10 @@ class Venues extends Component
         $this->user_id = $venue->user_id;
         $this->status = $venue->status;
         $this->gallery = $venue->gallery ?? [];
+        
+        // Set location as captured if coordinates exist
+        $this->locationCaptured = !empty($venue->latitude) && !empty($venue->longitude);
+        $this->gettingLocation = false;
         
         $this->showModal = true;
     }
@@ -138,6 +165,9 @@ class Venues extends Component
         $this->name = '';
         $this->description = '';
         $this->base_price = '';
+        $this->price_min = '';
+        $this->price_max = '';
+        $this->price_type = 'per_event';
         $this->location_name = '';
         $this->latitude = '';
         $this->longitude = '';
@@ -146,6 +176,8 @@ class Venues extends Component
         $this->status = 'active';
         $this->gallery = [];
         $this->newImages = [];
+        $this->locationCaptured = false;
+        $this->gettingLocation = false;
         $this->resetValidation();
     }
 
@@ -153,7 +185,34 @@ class Venues extends Component
     {
         $this->latitude = $latitude;
         $this->longitude = $longitude;
-        $this->location_name = $locationName;
+        if ($locationName) {
+            $this->location_name = $locationName;
+        }
+        $this->locationCaptured = true;
+        $this->gettingLocation = false;
+    }
+
+    public function getCurrentLocation()
+    {
+        if (!$this->gettingLocation && !$this->locationCaptured) {
+            $this->gettingLocation = true;
+            $this->dispatch('getCurrentLocation');
+        }
+    }
+
+    public function resetLocationCapture()
+    {
+        $this->locationCaptured = false;
+        $this->gettingLocation = false;
+        $this->latitude = '';
+        $this->longitude = '';
+        $this->location_name = '';
+    }
+
+    public function handleLocationError()
+    {
+        $this->gettingLocation = false;
+        $this->locationCaptured = false;
     }
 
     public function removeImage($index)
@@ -168,7 +227,23 @@ class Venues extends Component
 
     public function save()
     {
-        $this->validate();
+        try {
+            $this->validate();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Log validation errors for debugging
+            \Log::error('Venue validation failed', [
+                'errors' => $e->errors(),
+                'data' => $this->only([
+                    'name', 'description', 'base_price', 'price_min', 'price_max', 
+                    'price_type', 'location_name', 'latitude', 'longitude', 
+                    'category_id', 'user_id', 'status'
+                ])
+            ]);
+            
+            // Set session flash with validation errors for user feedback
+            session()->flash('error', 'Please fix the validation errors below.');
+            throw $e;
+        }
 
         try {
             // Handle image uploads
@@ -184,7 +259,10 @@ class Venues extends Component
             $data = [
                 'name' => $this->name,
                 'description' => $this->description,
-                'base_price' => $this->base_price,
+                'base_price' => $this->base_price ?: null, // Convert empty string to null
+                'price_min' => $this->price_min,
+                'price_max' => $this->price_max,
+                'price_type' => $this->price_type,
                 'location_name' => $this->location_name,
                 'latitude' => $this->latitude,
                 'longitude' => $this->longitude,
@@ -194,22 +272,36 @@ class Venues extends Component
                 'gallery' => $imagesPaths,
             ];
 
+            // Log the data being saved for debugging
+            \Log::info('Attempting to save venue', [
+                'editing' => $this->editingVenueId,
+                'data' => $data
+            ]);
+
             if ($this->editingVenueId) {
                 // Update existing venue
                 $venue = Venue::findOrFail($this->editingVenueId);
                 $venue->update($data);
                 
+                \Log::info('Venue updated', ['id' => $venue->id]);
                 session()->flash('success', 'Venue updated successfully!');
             } else {
                 // Create new venue
-                Venue::create($data);
+                $venue = Venue::create($data);
                 
+                \Log::info('Venue created', ['id' => $venue->id, 'name' => $venue->name]);
                 session()->flash('success', 'Venue created successfully!');
             }
 
             $this->resetModal();
             $this->dispatch('venueUpdated');
         } catch (\Exception $e) {
+            \Log::error('Error saving venue', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'data' => $data ?? null
+            ]);
             session()->flash('error', 'An error occurred while saving the venue: ' . $e->getMessage());
         }
     }
@@ -290,6 +382,24 @@ class Venues extends Component
     public function getVendorsProperty()
     {
         return User::where('role', 'vendor')->orderBy('name')->get();
+    }
+
+    public function checkDataAvailability()
+    {
+        $categories = $this->categories;
+        $vendors = $this->vendors;
+        
+        if ($categories->isEmpty()) {
+            session()->flash('warning', 'No venue categories found. Please create venue categories first.');
+            return false;
+        }
+        
+        if ($vendors->isEmpty()) {
+            session()->flash('warning', 'No vendors found. Please create vendor users first.');
+            return false;
+        }
+        
+        return true;
     }
 
     public function render()
