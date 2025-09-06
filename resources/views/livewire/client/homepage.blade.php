@@ -20,7 +20,7 @@
         <div class="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
         
         <!-- Blue Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-t from-blue-900 via-blue-800/50 to-transparent z-15"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#1F398A] via-blue-800/50 to-transparent z-15"></div>
         
         <!-- Content -->
         <div class="relative z-20 h-full flex flex-col justify-center">
@@ -30,7 +30,7 @@
                     <div class="flex justify-between items-center">
                         <!-- <div class="flex items-center space-x-4">
                             <div class="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-building text-blue-900 text-lg"></i>
+                                <i class="fas fa-building text-[#1F398A] text-lg"></i>
                             </div>
                             <div>
                                 <h2 class="text-xl font-bold text-white">VenueLink</h2>
@@ -45,7 +45,7 @@
             
             <!-- Hero Content -->
             <div class="container mx-auto px-4 text-center">
-                <div class="inline-block bg-yellow-400 text-blue-900 px-3 py-1 rounded-full text-xs font-semibold mb-4">
+                <div class="inline-block bg-yellow-400 text-[#1F398A] px-3 py-1 rounded-full text-xs font-semibold mb-4">
                     <i class="fas fa-star mr-1"></i>
                     Tanzania's Premier Event Platform
                 </div>
@@ -61,7 +61,7 @@
                 
                 <!-- CTA Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-center items-center mb-8">
-                    <button onclick="scrollToSearch()" class="bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold px-6 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    <button onclick="scrollToSearch()" class="bg-yellow-400 hover:bg-yellow-500 text-[#1F398A] font-bold px-6 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                         <i class="fas fa-search mr-2"></i>
                         Find Your Perfect Venue
                     </button>
@@ -127,14 +127,14 @@
                 <div class="flex bg-gray-100 rounded-lg p-1">
                     <button 
                         wire:click="switchView('venues')"
-                        class="px-6 py-2 rounded-md font-medium transition-all duration-200 {{ $viewType === 'venues' ? 'bg-blue-900 text-white shadow' : 'text-gray-600 hover:text-blue-900' }}"
+                        class="px-6 py-2 rounded-md font-medium transition-all duration-200 {{ $viewType === 'venues' ? 'bg-[#1F398A] text-white shadow' : 'text-gray-600 hover:text-[#1F398A]' }}"
                     >
                         <i class="fas fa-building mr-2"></i>
                         Venues
                     </button>
                     <button 
                         wire:click="switchView('services')"
-                        class="px-6 py-2 rounded-md font-medium transition-all duration-200 {{ $viewType === 'services' ? 'bg-blue-900 text-white shadow' : 'text-gray-600 hover:text-blue-900' }}"
+                        class="px-6 py-2 rounded-md font-medium transition-all duration-200 {{ $viewType === 'services' ? 'bg-[#1F398A] text-white shadow' : 'text-gray-600 hover:text-[#1F398A]' }}"
                     >
                         <i class="fas fa-concierge-bell mr-2"></i>
                         Services
@@ -145,7 +145,7 @@
                 <div class="hidden md:block text-sm text-gray-600">
                     @if($viewType === 'venues')
                         <span class="flex items-center">
-                            <i class="fas fa-building mr-1 text-blue-600"></i>
+                            <i class="fas fa-building mr-1 text-[#1F398A]"></i>
                             <strong>Venues:</strong> Physical locations for your events
                         </span>
                     @else
@@ -236,7 +236,7 @@
 
                             <!-- Price Badge -->
                             <div class="absolute bottom-3 left-3">
-                                <span class="bg-yellow-500 text-blue-900 px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
+                                <span class="bg-yellow-500 text-[#1F398A] px-3 py-1 rounded-full text-sm font-semibold shadow-sm">
                                     TSh {{ number_format($viewType === 'venues' ? $item->base_price : $item->price) }}
                                     @if($viewType === 'services' && $item->pricing_model !== 'flat')
                                         <span class="text-xs">/ {{ $item->pricing_model === 'hourly' ? 'hr' : 'guest' }}</span>
@@ -264,7 +264,7 @@
                                 
                                 <!-- Category Badge -->
                                 @if($item->category)
-                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                    <span class="bg-[#1F398A]/10 text-[#1F398A] text-xs px-2 py-1 rounded-full">
                                         {{ $item->category->name }}
                                     </span>
                                 @endif
@@ -288,7 +288,7 @@
 
                             <!-- Action Button -->
                             <a href="{{ $viewType === 'venues' ? route('view.venue.details', $item->id) : route('view.service.details', $item->id) }}"
-                               class="block w-full text-center bg-blue-900 hover:bg-blue-800 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200">
+                               class="block w-full text-center bg-[#1F398A] hover:bg-[#1F398A]/80 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200">
                                 View Details
                             </a>
                         </div>
@@ -303,7 +303,7 @@
         @else
             <!-- Empty State -->
             <div class="text-center py-16">
-                <div class="w-24 h-24 mx-auto mb-6 bg-blue-100 rounded-full flex items-center justify-center">
+                <div class="w-24 h-24 mx-auto mb-6 bg-[#1F398A]/10 rounded-full flex items-center justify-center">
                     <i class="fas fa-search text-3xl text-blue-400"></i>
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">No {{ $viewType }} found</h3>
@@ -311,7 +311,7 @@
                 <button 
                     wire:click="$set('searchQuery', '')"
                     onclick="@this.set('selectedCategory', ''); @this.set('priceRange', '');"
-                    class="bg-blue-900 hover:bg-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+                    class="bg-[#1F398A] hover:bg-[#1F398A]/80 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
                 >
                     Clear All Filters
                 </button>
@@ -324,7 +324,7 @@
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    Why Choose <span class="text-blue-600">VenueLink</span>?
+                    Why Choose <span class="text-[#1F398A]">VenueLink</span>?
                 </h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
                     We provide comprehensive event solutions with cutting-edge technology and exceptional service
@@ -334,8 +334,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
                 <div class="text-center p-8 rounded-xl hover:shadow-lg transition-all duration-300 group">
-                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors duration-300">
-                        <i class="fas fa-search text-3xl text-blue-600"></i>
+                    <div class="w-20 h-20 bg-[#1F398A]/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-[#1F398A]/20 transition-colors duration-300">
+                        <i class="fas fa-search text-3xl text-[#1F398A]"></i>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Smart Discovery</h3>
                     <p class="text-gray-600 leading-relaxed">
@@ -407,7 +407,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                     <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                        About <span class="text-blue-600">VenueLink</span>
+                        About <span class="text-[#1F398A]">VenueLink</span>
                     </h2>
                     <p class="text-lg text-gray-600 mb-6 leading-relaxed">
                         Founded with a vision to revolutionize event planning in Tanzania, VenueLink connects event organizers with the finest venues and professional services across the country.
@@ -418,27 +418,27 @@
                     
                     <div class="grid grid-cols-2 gap-6 mb-8">
                         <div class="text-center p-4 bg-white rounded-lg shadow-sm">
-                            <div class="text-2xl font-bold text-blue-600 mb-2">5+</div>
+                            <div class="text-2xl font-bold text-[#1F398A] mb-2">5+</div>
                             <div class="text-gray-600">Years Experience</div>
                         </div>
                         <div class="text-center p-4 bg-white rounded-lg shadow-sm">
-                            <div class="text-2xl font-bold text-blue-600 mb-2">50+</div>
+                            <div class="text-2xl font-bold text-[#1F398A] mb-2">50+</div>
                             <div class="text-gray-600">Cities Covered</div>
                         </div>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="/register" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors duration-200 text-center">
+                        <a href="/register" class="bg-[#1F398A] hover:bg-[#1F398A]/90 text-white px-8 py-4 rounded-lg font-semibold transition-colors duration-200 text-center">
                             Join Our Community
                         </a>
-                        <a href="#contact" class="bg-white hover:bg-gray-50 text-blue-600 px-8 py-4 rounded-lg font-semibold transition-colors duration-200 text-center border border-blue-600">
+                        <a href="#contact" class="bg-white hover:bg-gray-50 text-[#1F398A] px-8 py-4 rounded-lg font-semibold transition-colors duration-200 text-center border border-[#1F398A]">
                             Learn More
                         </a>
                     </div>
                 </div>
                 
                 <div class="relative">
-                    <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-8 text-white">
+                    <div class="bg-gradient-to-br from-[#1F398A] to-[#1F398A]/80 rounded-2xl p-8 text-white">
                         <h3 class="text-2xl font-bold mb-6">Our Mission</h3>
                         <p class="text-blue-100 mb-6 leading-relaxed">
                             To democratize access to premium event venues and services, making exceptional events accessible to everyone across Tanzania.
@@ -458,7 +458,7 @@
         <div class="container mx-auto px-4">
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    What Our <span class="text-blue-600">Customers</span> Say
+                    What Our <span class="text-[#1F398A]">Customers</span> Say
                 </h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
                     Don't just take our word for it. Here's what our satisfied customers have to say about their experience with VenueLink.
@@ -469,8 +469,8 @@
                 <!-- Testimonial 1 -->
                 <div class="bg-gray-50 rounded-xl p-8 hover:shadow-lg transition-all duration-300">
                     <div class="flex items-center mb-6">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                            <i class="fas fa-user text-blue-600"></i>
+                        <div class="w-12 h-12 bg-[#1F398A]/10 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-[#1F398A]"></i>
                         </div>
                         <div>
                             <h4 class="font-semibold text-gray-900">Sarah Mwalimu</h4>

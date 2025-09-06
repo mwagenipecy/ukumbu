@@ -10,10 +10,29 @@ Route::get('/', function () {
     return redirect()->to('welcome-client-page');
 });
 
+// Debug route to test middleware (remove in production)
+Route::get('/debug-middleware', function () {
+    if (!auth()->check()) {
+        return 'Not logged in';
+    }
+    
+    $user = auth()->user();
+    return [
+        'user' => $user->name,
+        'role' => $user->role,
+        'isAdmin' => $user->isAdmin(),
+        'isClient' => $user->isClient(),
+        'isVendor' => $user->isVendor(),
+        'canAccessAdmin' => $user->isAdmin(),
+        'shouldRedirectTo' => $user->isAdmin() ? 'admin dashboard' : 'user dashboard'
+    ];
+})->middleware('auth');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
+    'admin.access',
 ])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
@@ -31,50 +50,75 @@ Route::get('welcome-client-page',[WebController::class,'welcomeClientPage'])->na
 Route::get('view-venue-details/{id}',[WebController::class,'viewVenueDetails'])->name('view.venue.details');
 
 
-//// categories management 
-Route::get('categories-management',[WebController::class,'categoriesManagement'])->name('categories.management');
+// Admin-only routes (Categories Management)
+Route::middleware(['auth', 'admin.access'])->group(function () {
+    Route::get('categories-management',[WebController::class,'categoriesManagement'])->name('categories.management');
+});
 
 
-///// venue management 
-Route::get('venue-management',[WebController::class,'venueManagement'])->name('venue.management');
+// Admin-only routes (Venue Management)
+// Route::middleware(['auth', 'admin.access'])->group(function () {
+    Route::get('venue-management',[WebController::class,'venueManagement'])->name('venue.management');
+// });
 
 
-//// services managements 
-Route::get('services-management',[WebController::class,'servicesManagement'])->name('services.management');
-Route::get('view-service-details/{id}',[WebController::class,'viewServiceDetails'])->name('view.service.details');
-Route::middleware(['auth'])->group(function () {
+// Admin-only routes (Services Management)
+ Route::middleware(['auth', 'admin.access'])->group(function () {
     Route::get('service-form',[WebController::class,'serviceForm'])->name('admin.services.create');
     Route::get('service-form/{id}',[WebController::class,'serviceEditForm'])->name('service.form.edit');
+ });
+
+
+Route::get('services-management',[WebController::class,'servicesManagement'])->name('services.management');
+Route::get('view-service-details/{id}',[WebController::class,'viewServiceDetails'])->name('view.service.details');
+
+
+
+
+
+
+// Admin-only routes (User Management)
+Route::middleware(['auth', 'admin.access'])->group(function () {
+    Route::get('user-management',[UserManagementController::class,'userManagement'])->name('user.management');
+    Route::get('view-user-details/{id}', [UserManagementController::class, 'viewUserDetails'])->name('view.user.details');
 });
 
 
 
+// Admin-only routes (Review Management)
+Route::middleware(['auth', 'admin.access'])->group(function () {
+    Route::get('review-management',[ReviewController::class,'reviewManagement'])->name('review.manage');
+    Route::get('admin/reviews/export',[ReviewController::class,'exportReviews'])->name('admin.reviews.export');
+});
 
 
-//// user management 
-Route::get('user-management',[UserManagementController::class,'userManagement'])->name('user.management');
-Route::get('view-user-details/{id}', [UserManagementController::class, 'viewUserDetails'])->name('view.user.details');
+// Admin-only routes (Booking Management)
+ Route::middleware(['auth', 'admin.access'])->group(function () {
+  
 
-
-
-//// review management 
-Route::get('review-management',[ReviewController::class,'reviewManagement'])->name('review.manage');
-Route::get('admin/reviews/export',[ReviewController::class,'exportReviews'])->name('admin.reviews.export');
-
-
-/// boooking management 
-Route::get('booking-management',[BookingController::class,'bookingManagement'])->name('booking.management');
-Route::get('pending-booking',[BookingController::class,'pendingBooking'])->name('pending.booking');
+    Route::get('pending-booking',[BookingController::class,'pendingBooking'])->name('pending.booking');
 Route::get('show-booking/{id}',[BookingController::class,'pendingBooking'])->name('admin.bookings.show');
 Route::get('booking-invoice/{booking}',[BookingController::class,'pendingBooking'])->name('admin.bookings.invoice');
 Route::get('payment-issues', [BookingController::class, 'paymentIssues'])->name('payment.issues');
 
-// Admin Calendar Route
-Route::get('admin/calendar', function () {
-    return view('livewire.admin.calendar');
-})->name('admin.calendar');
 
-// User Dashboard Routes
+});
+
+
+
+Route::get('booking-management',[BookingController::class,'bookingManagement'])->name('booking.management');
+
+
+
+
+// Admin Calendar Route (Admin Access Only)
+Route::middleware(['auth', 'admin.access'])->group(function () {
+    Route::get('admin/calendar', function () {
+        return view('livewire.admin.calendar');
+    })->name('admin.calendar');
+});
+
+// User Dashboard Routes (Client & Vendor Access)
 Route::middleware(['auth'])->group(function () {
     Route::get('user/dashboard', function () {
         return view('pages.user-dashboard');
@@ -85,7 +129,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('user.booking.details');
 });
 
-// Vendor Routes
+// Vendor Routes (Client & Vendor Access)
 Route::middleware(['auth'])->group(function () {
     Route::get('vendor/dashboard', function () {
         return view('pages.vendor-dashboard');
@@ -96,8 +140,8 @@ Route::middleware(['auth'])->group(function () {
     })->name('vendor.pending');
 });
 
-// Admin Routes
-Route::middleware(['auth'])->group(function () {
+// Admin Routes (Admin Access Only)
+Route::middleware(['auth', 'admin.access'])->group(function () {
     Route::get('admin/dashboard', function () {
         return view('pages.admin.dashboard');
     })->name('admin.dashboard');

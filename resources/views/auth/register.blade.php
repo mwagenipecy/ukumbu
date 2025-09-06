@@ -8,7 +8,7 @@
         <div>
             <!-- Logo -->
             <div class="flex justify-center">
-                <div class="w-16 h-16 bg-gradient-to-r from-blue-900 to-blue-700 rounded-xl flex items-center justify-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-[#1F398A] to-[#1F398A]/80 rounded-xl flex items-center justify-center">
                     <i class="fas fa-building text-white text-2xl"></i>
                 </div>
             </div>
@@ -39,7 +39,7 @@
                             autocomplete="name" 
                             required 
                             value="{{ old('name') }}"
-                            class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm @error('name') border-red-500 @enderror"
+                            class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F398A] focus:border-[#1F398A] focus:z-10 sm:text-sm @error('name') border-red-500 @enderror"
                             placeholder="Enter your full name"
                         >
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -64,7 +64,7 @@
                             autocomplete="email" 
                             required 
                             value="{{ old('email') }}"
-                            class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm @error('email') border-red-500 @enderror"
+                            class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F398A] focus:border-[#1F398A] focus:z-10 sm:text-sm @error('email') border-red-500 @enderror"
                             placeholder="Enter your email"
                         >
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -86,7 +86,7 @@
                             id="role" 
                             name="role" 
                             required
-                            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm @error('role') border-red-500 @enderror"
+                            class="appearance-none relative block w-full px-3 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F398A] focus:border-[#1F398A] focus:z-10 sm:text-sm @error('role') border-red-500 @enderror"
                         >
                             <option value="">Select account type</option>
                             <option value="client" {{ old('role') === 'client' ? 'selected' : '' }}>Client - I want to book venues</option>
@@ -110,7 +110,7 @@
                             type="password" 
                             autocomplete="new-password" 
                             required
-                            class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm @error('password') border-red-500 @enderror"
+                            class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F398A] focus:border-[#1F398A] focus:z-10 sm:text-sm @error('password') border-red-500 @enderror"
                             placeholder="Create a password"
                         >
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -139,7 +139,7 @@
                             type="password" 
                             autocomplete="new-password" 
                             required
-                            class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F398A] focus:border-[#1F398A] focus:z-10 sm:text-sm"
                             placeholder="Confirm your password"
                         >
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -161,15 +161,15 @@
                             name="terms" 
                             type="checkbox" 
                             required
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            class="h-4 w-4 text-[#1F398A] focus:ring-[#1F398A] border-gray-300 rounded"
                         >
                     </div>
                     <div class="ml-3 text-sm">
                         <label for="terms" class="text-gray-600">
                             I agree to the 
-                            <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Terms and Conditions</a>
+                            <a href="#" class="text-[#1F398A] hover:text-[#1F398A]/80 font-medium">Terms and Conditions</a>
                             and 
-                            <a href="#" class="text-blue-600 hover:text-blue-500 font-medium">Privacy Policy</a>
+                            <a href="#" class="text-[#1F398A] hover:text-[#1F398A]/80 font-medium">Privacy Policy</a>
                         </label>
                     </div>
                 </div>
@@ -179,7 +179,7 @@
             <div>
                 <button 
                     type="submit" 
-                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-900 hover:bg-[#1F398A]/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1F398A] transition-colors duration-200"
                 >
                     <span class="absolute left-0 inset-y-0 flex items-center pl-3">
                         <i class="fas fa-user-plus text-blue-300 group-hover:text-blue-200"></i>
@@ -214,7 +214,7 @@
                     type="button" 
                     class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors duration-200"
                 >
-                    <i class="fab fa-facebook-f text-blue-600"></i>
+                    <i class="fab fa-facebook-f text-[#1F398A]"></i>
                     <span class="ml-2">Facebook</span>
                 </button>
             </div>
@@ -223,7 +223,7 @@
             <div class="text-center">
                 <p class="text-sm text-gray-600">
                     Already have an account?
-                    <a href="{{ route('login') }}" class="font-medium text-blue-600 hover:text-blue-500">
+                    <a href="{{ route('login') }}" class="font-medium text-[#1F398A] hover:text-[#1F398A]/80">
                         Sign in instead
                     </a>
                 </p>
