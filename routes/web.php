@@ -161,3 +161,9 @@ Route::middleware(['auth', 'admin.access'])->group(function () {
         })->name('admin.services.create.form');
     });
 });
+
+// Fallback route for any unmatched URLs - this will trigger 404
+Route::fallback(function () {
+    abort(404);
+});
+
